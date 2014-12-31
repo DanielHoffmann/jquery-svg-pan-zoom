@@ -183,6 +183,7 @@ do ($ = jQuery) ->
                             height: viewBox.height
                         ,
                             duration: animationTime
+                            easing: "linear"
                             step: ((value, properties) ->
                                 $div= $animationDiv
                                 @.$svg[0].setAttribute("viewBox", "#{ $div.css("left")[0..-3] } #{ $div.css("top")[0..-3] } #{ $div.css("width")[0..-3] } #{ $div.css("height")[0..-3] }")
