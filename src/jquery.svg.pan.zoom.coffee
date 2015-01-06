@@ -3,6 +3,138 @@ jQuery SVG Pan Zoom v1.0.0, December 2014
 
 Author: Daniel Hoffmann Bernardes (daniel.hoffmann.bernardes@gmail.com)
 
+Repository: https://github.com/DanielHoffmann/jquery-svg-pan-zoom/
+
+jQuery plugin to enable pan and zoom in SVG images either programatically or through mouse/touch events.
+
+# Requirements
+
+jQuery
+
+SVG-enabled browser (does not work with SVG work-arounds that use Flash)
+
+# The viewBox
+The viewBox is an attribute of SVG images that define which parts of the image are visible, it is defined by 4 numbers: X, Y, Width, Height. These numbers together specify the visible area. This plugin works by manipulating these four numbers. For example, moving the image to the right alters the X value while zooming in reduces Width and Height.
+
+
+# Usage
+
+var svgPanZoom= $("svg").svgPanZoom(options)
+
+If the selection has more than one element `svgPanZoom` will return an array with an SvgPanZoom object for each image in the same order of the selection. If only one element is selected then the return is a single SvgPanZoom object. If no elements are selected the above call returns `null`
+
+The returned SvgPanZoom object contains all options, these options can be overriden at any time directly, for example to disable mouseWheel events simply:
+
+svgPanZoom.events.mouseWheel= false
+
+
+the SvgPanZoom object also has methods for manipulating the viewBox programatically. For example:
+
+svgPanZoom.zoomIn()
+
+will zoomIn the image using options.zoomFactor.
+
+
+
+# Options
+
+Options:
+{
+    events: {
+        mouseWheel: boolean (true), // enables mouse wheel zooming events
+        doubleClick: boolean (true), // enables double-click to zoom-in events
+        drag: boolean (true), // enables drag and drop to move the SVG events
+        dragCursor: string "move" // cursor to use while dragging the SVG
+    },
+    animationTime: number (300) // time in milliseconds to use as default for animations. Set 0 to remove the animation
+    zoomFactor: 0.25 // how much to zoom-in or zoom-out
+    panFactor: 100 // how much to move the viewBox when calling .panDirection() methods
+    initialViewBox: { // the initial viewBox, if null or undefined will try to use the viewBox set in the svg tag. Also accepts string in the format "X Y Width Height"
+        x: number (0) // the top-left corner X coordinate
+        y: number (0) // the top-left corner Y coordinate
+        width: number (1000) // the width of the viewBox
+        height: number (1000) // the height of the viewBox
+    },
+    limits: { // the limits in which the image can be moved. If null or undefined will use the initialViewBox plus 15% in each direction
+        x: number (-150)
+        y: number (-150)
+        x2: number (1150)
+        y2: number (1150)
+    }
+}
+
+
+# Methods
+
+ - pan
+
+svgPanZoom.panLeft(amount, animationTime)
+svgPanZoom.panRight(amount, animationTime)
+svgPanZoom.panUp(amount, animationTime)
+svgPanZoom.panDown(amount, animationTime)
+
+Moves the SVG viewBox in the specified direction. Parameters:
+ - amount: Number, optional. How much to move the viewBox, defaults to options.panFactor.
+ - animationTime: Number, optional. How long the animation should last, defaults to options.animationTime.
+
+
+ - zoom
+
+svgPanZoom.zoomIn(animationTime)
+svgPanZoom.zoomOut(animationTime)
+
+Zooms the viewBox. Parameters:
+ - animationTime: Number, optional. How long the animation should last, defaults to options.animationTime.
+
+
+ - reset
+
+svgPanZoom.reset()
+
+Resets the SVG to options.initialViewBox values.
+
+ - getViewBox
+
+svgPanZoom.getViewBox()
+
+Returns the viewbox in this format:
+
+{
+    x: number
+    y: number
+    width: number
+    height: number
+}
+
+
+ - setViewBox
+
+svgPanZoom.setCenter(x, y, width, height, animationTime)
+
+Changes the viewBox to the specified coordinates. Will respect the `options.limits` adapting the viewBox if needed (moving or reducing it to fit into `options.limits`
+ - x: Number, the new x coodinate of the top-left corner
+ - y: Number, the new y coodinate of the top-left corner
+ - width: Number, the new width of the viewBox
+ - height: Number, the new height of the viewBox
+ - animationTime: Number, optional. How long the animation should last, defaults to options.animationTime.
+
+ - setCenter
+
+svgPanZoom.setCenter(x, y, animationTime)
+
+Sets the center of the SVG. Parameters:
+ - x: Number, the new x coodinate of the center
+ - y: Number, the new y coodinate of the center
+ - animationTime: Number, optional. How long the animation should last, defaults to options.animationTime.
+
+
+
+
+# Notes:
+
+ - Only works in SVGs inlined in the HTML. You can use $.load() to load the SVG image in the page using AJAX and call $().svgPanZoom() in the callback
+ - Touch pinch events to zoom not yet supported
+ - This plugin does not create any controls (like arrows to move the image) on top of the SVG. These controls are simple to create manually and they can call the methods to move the image.
 
 Copyright (C) 2014 Daniel Hoffmann Bernardes, Ícaro Technologies
  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -74,6 +206,18 @@ do ($ = jQuery) ->
 
         return vb
 
+    #parses the viewbox string as defined in the spec for the svg tag
+    #returns an object with x, y, width and height values
+    parseViewBoxString = (string) ->
+        opts.initialViewBox.replace("\s+", " ")
+        vb = vb.split(" ")
+        vb =
+            x: vb[0]
+            y: vb[1]
+            width: vb[2]
+            height: vb[3]
+
+
     #gets the mouse or first touch position from the event relative to the SVG viewBox
     #svgRoot is the DOM object (not jQuery object)
     #returns an object { x: , y: }
@@ -114,19 +258,18 @@ do ($ = jQuery) ->
                         y: vb.y
                         width: vb.width
                         height: vb.height
-
             else if typeof opts.initialViewBox == "string"
-                vb = opts.initialViewBox.replace("\s+", " ")
-                vb = vb.split(" ")
-                vb =
-                    x: vb[0]
-                    y: vb[1]
-                    width: vb[2]
-                    height: vb[3]
-
+                vb = parseViewBoxString(opts.initialViewBox)
             else if typeof opts.initialViewBox == "object"
-                vb = $.extend({}, defaultViewBox, opts.initialViewBox)
-
+                vb == null
+                if opts.initialViewBox == null
+                    vb = opts.$svg[0].getAttribute("viewBox")
+                    if vb?
+                        vb = parseViewBoxString(vb)
+                    else
+                        vb = null
+                if vb == null
+                    vb = $.extend({}, defaultViewBox, opts.initialViewBox)
             else
                 throw "initialViewBox is of invalid type"
 
@@ -134,7 +277,7 @@ do ($ = jQuery) ->
             #it is not exposed directly to the end user, to access it
             #the user must use getViewBox() or setViewBox()
             viewBox = vb
-            opts.initialViewBox = $.extend({}, viewBox) #doing this so we can .reset() more easily
+            opts.initialViewBox = $.extend({}, viewBox)
 
             unless opts.limits?
                 horizontalSizeIncrement = viewBox.width * 0.15
@@ -154,10 +297,8 @@ do ($ = jQuery) ->
                 return $.extend({}, viewBox)
 
             $animationDiv = $("<div></div>")
-            firstAnimation = true
             opts.setViewBox = (x, y, width, height, animationTime= @animationTime) ->
-                if animationTime > 0 && firstAnimation
-                    firstAnimation = false
+                if animationTime > 0
                     $animationDiv.css
                         left: viewBox.x + "px"
                         top: viewBox.y + "px"
@@ -253,6 +394,8 @@ do ($ = jQuery) ->
                 if delta == 0 or opts.events.mouseWheel != true
                     return
 
+                oldViewBox = @getViewBox()
+
                 ev.preventDefault()
                 ev.stopPropagation()
 
@@ -275,7 +418,10 @@ do ($ = jQuery) ->
                     x: oldcenter.x + (oldMousePosition.x - newMousePosition.x)
                     y: oldcenter.y + (oldMousePosition.y - newMousePosition.y)
 
-                @setCenter(newcenter.x, newcenter.y)
+                @setCenter(newcenter.x, newcenter.y, 0)
+                newViewBox = @getViewBox()
+                @setViewBox(oldViewBox.x, oldViewBox.y, oldViewBox.width, oldViewBox.height, 0)
+                @setViewBox(newViewBox.x, newViewBox.y, newViewBox.width, newViewBox.height)
                 return
             ).bind(opts)
 
