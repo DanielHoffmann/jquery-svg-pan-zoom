@@ -15,6 +15,9 @@
   ],
   "main": "compiled/jquery.svg.pan.zoom.js",
   "license": "MIT",
+  "dependencies": {
+    "jquery": ">=1.7.0"
+  },
   "ignore": [
     "src/*.coffee",
     "node_modules",
