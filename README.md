@@ -3,6 +3,8 @@ jquery-svg-pan-zoom
 
 jQuery plugin to enable pan and zoom in SVG images either programatically or through mouse/touch events.
 
+[Demo page](http://danielhoffmann.github.io/jquery-svg-pan-zoom/)
+
 # Requirements
 
 jQuery
