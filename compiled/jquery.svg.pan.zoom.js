@@ -125,8 +125,8 @@ Changes the viewBox to the specified coordinates. Will respect the `options.limi
 svgPanZoom.setCenter(x, y, animationTime)
 
 Sets the center of the SVG. Parameters:
- - x: Number, the new x coodinate of the center
- - y: Number, the new y coodinate of the center
+ - x: Number, the new x coordinate of the center
+ - y: Number, the new y coordinate of the center
  - animationTime: Number, optional. How long the animation should last, defaults to options.animationTime.
 
 
@@ -148,7 +148,7 @@ Copyright (C) 2014 Daniel Hoffmann Bernardes, Ícaro Technologies
   var __hasProp = {}.hasOwnProperty;
 
   (function($) {
-    var checkLimits, defaultOptions, defaultViewBox, getViewBoxCoordinatesFromEvent, parseViewBoxString;
+    var checkLimits, defaultOptions, defaultViewBox, getViewBoxCoordinatesFromEvent, mouseZoom, parseViewBoxString;
     defaultOptions = {
       events: {
         mouseWheel: true,
@@ -237,11 +237,40 @@ Copyright (C) 2014 Daniel Hoffmann Bernardes, Ícaro Technologies
       pos = pos.matrixTransform(ctm);
       return pos;
     };
+    mouseZoom = function(event, zoomIn, opts) {
+      var newMousePosition, newViewBox, newcenter, oldDistanceFromCenter, oldMousePosition, oldViewBox, oldcenter;
+      oldViewBox = this.getViewBox();
+      event.preventDefault();
+      event.stopPropagation();
+      oldMousePosition = getViewBoxCoordinatesFromEvent(this.$svg[0], ev);
+      oldcenter = {
+        x: viewBox.x + viewBox.width / 2,
+        y: viewBox.y + viewBox.height / 2
+      };
+      oldDistanceFromCenter = {
+        x: oldcenter.x - oldMousePosition.x,
+        y: oldcenter.y - oldMousePosition.y
+      };
+      if (delta > 0) {
+        this.zoomIn(void 0, 0);
+      } else {
+        this.zoomOut(void 0, 0);
+      }
+      newMousePosition = getViewBoxCoordinatesFromEvent(this.$svg[0], ev);
+      newcenter = {
+        x: oldcenter.x + (oldMousePosition.x - newMousePosition.x),
+        y: oldcenter.y + (oldMousePosition.y - newMousePosition.y)
+      };
+      this.setCenter(newcenter.x, newcenter.y, 0);
+      newViewBox = this.getViewBox();
+      this.setViewBox(oldViewBox.x, oldViewBox.y, oldViewBox.width, oldViewBox.height, 0);
+      this.setViewBox(newViewBox.x, newViewBox.y, newViewBox.width, newViewBox.height);
+    };
     return $.fn.svgPanZoom = function(options) {
       var ret;
       ret = [];
       this.each(function() {
-        var $animationDiv, dragStarted, horizontalSizeIncrement, key, opts, value, vb, verticalSizeIncrement, viewBox;
+        var $animationDiv, dragStarted, horizontalSizeIncrement, key, opts, preventClick, value, vb, verticalSizeIncrement, viewBox;
         opts = $.extend({}, options, defaultOptions);
         opts.$svg = $(this);
         if (opts.animationTime == null) {
@@ -419,14 +448,6 @@ Copyright (C) 2014 Daniel Hoffmann Bernardes, Ícaro Technologies
             opts.key = value.bind(opts);
           }
         }
-        opts.$svg.dblclick((function(ev) {
-          if (opts.events.doubleClick !== true) {
-            return;
-          }
-          ev.preventDefault();
-          ev.stopPropagation();
-          return this.zoomIn();
-        }).bind(opts));
         opts.$svg.on("mousewheel", (function(ev) {
           var delta, newMousePosition, newViewBox, newcenter, oldDistanceFromCenter, oldMousePosition, oldViewBox, oldcenter;
           delta = ev.originalEvent.wheelDeltaY;
@@ -460,16 +481,34 @@ Copyright (C) 2014 Daniel Hoffmann Bernardes, Ícaro Technologies
           this.setViewBox(oldViewBox.x, oldViewBox.y, oldViewBox.width, oldViewBox.height, 0);
           this.setViewBox(newViewBox.x, newViewBox.y, newViewBox.width, newViewBox.height);
         }).bind(opts));
+        opts.$svg.dblclick((function(ev) {
+          if (opts.events.doubleClick !== true) {
+            return;
+          }
+          ev.preventDefault();
+          ev.stopPropagation();
+          return this.zoomIn();
+        }).bind(opts));
+        opts.$svg[0].addEventListener("click", function(ev) {
+          var preventClick;
+          if (preventClick) {
+            preventClick = false;
+            ev.stopPropagation();
+            return ev.preventDefault();
+          }
+        }, true);
         dragStarted = false;
+        preventClick = false;
         opts.$svg.on("mousedown touchstart", (function(ev) {
           var $body, initialViewBox, mouseMoveCallback, mouseUpCallback, oldCursor;
           if (dragStarted) {
             return;
           }
-          dragStarted = true;
-          if (opts.events.drag !== true || ev.which === 3) {
+          if (opts.events.drag !== true || ev.which !== 1) {
             return;
           }
+          dragStarted = true;
+          preventClick = false;
           ev.preventDefault();
           ev.stopPropagation();
           initialViewBox = $.extend({}, viewBox);
@@ -484,6 +523,9 @@ Copyright (C) 2014 Daniel Hoffmann Bernardes, Ícaro Technologies
             ev2.stopPropagation();
             initialMousePosition = getViewBoxCoordinatesFromEvent(this.$svg[0], ev);
             currentMousePosition = getViewBoxCoordinatesFromEvent(this.$svg[0], ev2);
+            if (Math.sqrt(Math.pow(ev.pageX + ev2.pageX, 2) + Math.pow(ev.pageY + ev2.pageY, 2)) > 3) {
+              preventClick = true;
+            }
             this.setViewBox(initialViewBox.x + initialMousePosition.x - currentMousePosition.x, initialViewBox.y + initialMousePosition.y - currentMousePosition.y, null, null, 0);
           }).bind(opts);
           mouseUpCallback = (function(ev2) {
@@ -508,7 +550,7 @@ Copyright (C) 2014 Daniel Hoffmann Bernardes, Ícaro Technologies
           $body[0].addEventListener("mouseup", mouseUpCallback, true);
           $body[0].addEventListener("touchend", mouseUpCallback, true);
           $body[0].addEventListener("touchcancel", mouseUpCallback, true);
-          return $body[0].addEventListener("mouseout", mouseUpCallback, true);
+          $body[0].addEventListener("mouseout", mouseUpCallback, true);
         }).bind(opts));
         opts.setViewBox(vb.x, vb.y, vb.width, vb.height, 0);
         ret.push(opts);

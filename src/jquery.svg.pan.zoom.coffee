@@ -123,8 +123,8 @@ Changes the viewBox to the specified coordinates. Will respect the `options.limi
 svgPanZoom.setCenter(x, y, animationTime)
 
 Sets the center of the SVG. Parameters:
- - x: Number, the new x coodinate of the center
- - y: Number, the new y coodinate of the center
+ - x: Number, the new x coordinate of the center
+ - y: Number, the new y coordinate of the center
  - animationTime: Number, optional. How long the animation should last, defaults to options.animationTime.
 
 
@@ -233,12 +233,45 @@ do ($ = jQuery) ->
         ctm = ctm.inverse()
         pos = pos.matrixTransform(ctm);
         return pos
+        
+        
+    #performs a zoomIn or zoomOut on the opts referenced SVG using the event mouse position
+    mouseZoom = (event, zoomIn, opts) ->
+        oldViewBox = @getViewBox()
+
+        event.preventDefault()
+        event.stopPropagation()
+
+        oldMousePosition = getViewBoxCoordinatesFromEvent(@$svg[0], ev)
+        oldcenter =
+            x: viewBox.x + viewBox.width/2
+            y: viewBox.y + viewBox.height/2
+        oldDistanceFromCenter =
+            x: oldcenter.x - oldMousePosition.x
+            y: oldcenter.y - oldMousePosition.y
+
+        if delta > 0
+            @zoomIn(undefined, 0)
+        else
+            @zoomOut(undefined, 0)
+
+        newMousePosition = getViewBoxCoordinatesFromEvent(@$svg[0], ev)
+
+        newcenter =
+            x: oldcenter.x + (oldMousePosition.x - newMousePosition.x)
+            y: oldcenter.y + (oldMousePosition.y - newMousePosition.y)
+
+        @setCenter(newcenter.x, newcenter.y, 0)
+        newViewBox = @getViewBox()
+        @setViewBox(oldViewBox.x, oldViewBox.y, oldViewBox.width, oldViewBox.height, 0) #turns back the viewBox to the original position
+        @setViewBox(newViewBox.x, newViewBox.y, newViewBox.width, newViewBox.height) #sets the viewBox to the new calculated position but shows animation if enabled
+        return
 
     $.fn.svgPanZoom = (options) ->
         ret= []
         @each ->
             #opts is the object that is returned to the caller with methods.
-            #The opts object contains the inital options in addition to methods to manipulate
+            #The opts object contains the initial options in addition to methods to manipulate
             #the SVG
             opts = $.extend({}, options, defaultOptions)
             opts.$svg = $(@)
@@ -377,14 +410,7 @@ do ($ = jQuery) ->
                     opts.key= value.bind(opts)
 
             #binding events
-
-            opts.$svg.dblclick ((ev) ->
-                if opts.events.doubleClick != true
-                    return
-                ev.preventDefault()
-                ev.stopPropagation()
-                @zoomIn()
-            ).bind(opts)
+            
 
             #TODO detect presence of jquery-mousewheel plugin (soon it will merged to core jQuery)
             #use it instead of getting the delta from the original event
@@ -420,19 +446,39 @@ do ($ = jQuery) ->
 
                 @setCenter(newcenter.x, newcenter.y, 0)
                 newViewBox = @getViewBox()
-                @setViewBox(oldViewBox.x, oldViewBox.y, oldViewBox.width, oldViewBox.height, 0)
-                @setViewBox(newViewBox.x, newViewBox.y, newViewBox.width, newViewBox.height)
+                @setViewBox(oldViewBox.x, oldViewBox.y, oldViewBox.width, oldViewBox.height, 0) #turns back the viewBox to the original position
+                @setViewBox(newViewBox.x, newViewBox.y, newViewBox.width, newViewBox.height) #sets the viewBox to the new calculated position but shows animation if enabled
                 return
             ).bind(opts)
 
-            dragStarted = false
+            
 
+            opts.$svg.dblclick ((ev) ->
+                if opts.events.doubleClick != true
+                    return
+                ev.preventDefault()
+                ev.stopPropagation()
+                @zoomIn()
+            ).bind(opts)
+
+            opts.$svg[0].addEventListener("click", (ev) ->
+                if preventClick
+                    preventClick = false
+                    ev.stopPropagation()
+                    ev.preventDefault()
+            , true)
+            
+            dragStarted = false
+                        
+            preventClick = false
+            
             opts.$svg.on "mousedown touchstart", ((ev) ->
                 if dragStarted #a drag operation is already happening
                     return
-                dragStarted = true
-                if opts.events.drag != true or ev.which == 3 #right click
+                if opts.events.drag != true or ev.which != 1 #right click
                     return
+                dragStarted = true
+                preventClick = false
 
                 ev.preventDefault()
                 ev.stopPropagation()
@@ -453,7 +499,10 @@ do ($ = jQuery) ->
                     initialMousePosition = getViewBoxCoordinatesFromEvent(@$svg[0], ev)
 
                     currentMousePosition = getViewBoxCoordinatesFromEvent(@$svg[0], ev2)
-
+                    
+                    if Math.sqrt(Math.pow(ev.pageX + ev2.pageX, 2) + Math.pow(ev.pageY + ev2.pageY, 2)) > 3 #mouse moved at least 3 pixels
+                        preventClick = true
+                        
                     @setViewBox(
                         initialViewBox.x + initialMousePosition.x - currentMousePosition.x,
                         initialViewBox.y + initialMousePosition.y - currentMousePosition.y,
@@ -467,6 +516,7 @@ do ($ = jQuery) ->
                 mouseUpCallback = ((ev2) ->
                     if ev2.type == "mouseout" and ev2.target != ev2.currentTarget #mouse out on an element that is not the body
                         return
+                    
                     ev2.preventDefault()
                     ev2.stopPropagation()
 
@@ -490,6 +540,7 @@ do ($ = jQuery) ->
                 $body[0].addEventListener("touchend", mouseUpCallback, true)
                 $body[0].addEventListener("touchcancel", mouseUpCallback, true)
                 $body[0].addEventListener("mouseout", mouseUpCallback, true)
+                return
             ).bind(opts)
 
 
