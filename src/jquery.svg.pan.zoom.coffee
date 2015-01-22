@@ -109,7 +109,7 @@ Returns the viewbox in this format:
 
  - setViewBox
 
-svgPanZoom.setCenter(x, y, width, height, animationTime)
+svgPanZoom.setViewBox(x, y, width, height, animationTime)
 
 Changes the viewBox to the specified coordinates. Will respect the `options.limits` adapting the viewBox if needed (moving or reducing it to fit into `options.limits`
  - x: Number, the new x coodinate of the top-left corner
