@@ -209,13 +209,12 @@ do ($ = jQuery) ->
     #parses the viewbox string as defined in the spec for the svg tag
     #returns an object with x, y, width and height values
     parseViewBoxString = (string) ->
-        opts.initialViewBox.replace("\s+", " ")
-        vb = vb.split(" ")
+        vb = string.replace("\s+", " ").split(" ")
         vb =
-            x: vb[0]
-            y: vb[1]
-            width: vb[2]
-            height: vb[3]
+            x: parseFloat(vb[0])
+            y: parseFloat(vb[1])
+            width: parseFloat(vb[2])
+            height: parseFloat(vb[3])
 
 
     #gets the mouse or first touch position from the event relative to the SVG viewBox
@@ -273,7 +272,7 @@ do ($ = jQuery) ->
             #opts is the object that is returned to the caller with methods.
             #The opts object contains the initial options in addition to methods to manipulate
             #the SVG
-            opts = $.extend({}, options, defaultOptions)
+            opts = $.extend(true, {}, defaultOptions, options)
             opts.$svg = $(@)
 
             unless opts.animationTime?

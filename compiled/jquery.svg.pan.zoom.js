@@ -213,13 +213,12 @@ Copyright (C) 2014 Daniel Hoffmann Bernardes, Ícaro Technologies
     };
     parseViewBoxString = function(string) {
       var vb;
-      opts.initialViewBox.replace("\s+", " ");
-      vb = vb.split(" ");
+      vb = string.replace("\s+", " ").split(" ");
       return vb = {
-        x: vb[0],
-        y: vb[1],
-        width: vb[2],
-        height: vb[3]
+        x: parseFloat(vb[0]),
+        y: parseFloat(vb[1]),
+        width: parseFloat(vb[2]),
+        height: parseFloat(vb[3])
       };
     };
     getViewBoxCoordinatesFromEvent = function(svgRoot, event) {
@@ -271,7 +270,7 @@ Copyright (C) 2014 Daniel Hoffmann Bernardes, Ícaro Technologies
       ret = [];
       this.each(function() {
         var $animationDiv, dragStarted, horizontalSizeIncrement, key, opts, preventClick, value, vb, verticalSizeIncrement, viewBox;
-        opts = $.extend({}, options, defaultOptions);
+        opts = $.extend(true, {}, defaultOptions, options);
         opts.$svg = $(this);
         if (opts.animationTime == null) {
           opts.animationTime = 0;
