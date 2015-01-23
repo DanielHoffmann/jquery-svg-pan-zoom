@@ -233,8 +233,12 @@ do ($ = jQuery) ->
     getViewBoxCoordinatesFromEvent = (svgRoot, event) ->
         pos = svgRoot.createSVGPoint()
         if event.type == "touchstart" or event.type == "touchmove"
-            pos.x = event.originalEvent.touches[0].clientX
-            pos.y = event.originalEvent.touches[0].clientY
+            if event.originalEvent?
+                pos.x = event.originalEvent.touches[0].clientX
+                pos.y = event.originalEvent.touches[0].clientY
+            else
+                pos.x = event.touches[0].clientX
+                pos.y = event.touches[0].clientY
         else #mouse event
             pos.x = event.clientX
             pos.y = event.clientY
@@ -484,7 +488,7 @@ do ($ = jQuery) ->
             opts.$svg.on "mousedown touchstart", ((ev) ->
                 if dragStarted #a drag operation is already happening
                     return
-                if opts.events.drag != true or ev.which != 1 #right click
+                if opts.events.drag != true or (ev.type == "mousedown" and ev.which != 1)
                     return
                 dragStarted = true
                 preventClick = false

@@ -235,8 +235,13 @@ Copyright (C) 2014 Daniel Hoffmann Bernardes, Ícaro Technologies
       var ctm, pos;
       pos = svgRoot.createSVGPoint();
       if (event.type === "touchstart" || event.type === "touchmove") {
-        pos.x = event.originalEvent.touches[0].clientX;
-        pos.y = event.originalEvent.touches[0].clientY;
+        if (event.originalEvent != null) {
+          pos.x = event.originalEvent.touches[0].clientX;
+          pos.y = event.originalEvent.touches[0].clientY;
+        } else {
+          pos.x = event.touches[0].clientX;
+          pos.y = event.touches[0].clientY;
+        }
       } else {
         pos.x = event.clientX;
         pos.y = event.clientY;
@@ -513,7 +518,7 @@ Copyright (C) 2014 Daniel Hoffmann Bernardes, Ícaro Technologies
           if (dragStarted) {
             return;
           }
-          if (opts.events.drag !== true || ev.which !== 1) {
+          if (opts.events.drag !== true || (ev.type === "mousedown" && ev.which !== 1)) {
             return;
           }
           dragStarted = true;
