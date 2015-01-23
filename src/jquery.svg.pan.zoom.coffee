@@ -1,11 +1,21 @@
 ###
-jQuery SVG Pan Zoom v1.0.0, December 2014
+jQuery SVG Pan Zoom v1.0.1, December 2014
 
 Author: Daniel Hoffmann Bernardes (daniel.hoffmann.bernardes@gmail.com)
 
 Repository: https://github.com/DanielHoffmann/jquery-svg-pan-zoom/
 
-jQuery plugin to enable pan and zoom in SVG images either programatically or through mouse/touch events.
+jQuery plugin to enable pan and zoom in SVG images either programmatically or through mouse/touch events.
+
+[Demo page](http://danielhoffmann.github.io/jquery-svg-pan-zoom/)
+
+# Features
+ - Programmatically manipulate the SVG viewBox
+ - Mouse and touch events to pan the SVG viewBox
+ - Mousewheel events to zoom in or out the SVG viewBox
+ - Animations
+ - Mousewheel zooming keeps the cursor over the same coordinates relative to the image (A.K.A. GoogleMaps-like zoom)
+ - Limiting the navigable area
 
 # Requirements
 
@@ -28,7 +38,7 @@ The returned SvgPanZoom object contains all options, these options can be overri
 svgPanZoom.events.mouseWheel= false
 
 
-the SvgPanZoom object also has methods for manipulating the viewBox programatically. For example:
+the SvgPanZoom object also has methods for manipulating the viewBox programmatically. For example:
 
 svgPanZoom.zoomIn()
 

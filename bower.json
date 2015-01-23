@@ -1,6 +1,6 @@
 {
   "name": "jquery-svg-pan-zoom",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "homepage": "https://github.com/DanielHoffmann/jquery-svg-pan-zoom",
   "authors": [
     "Daniel Hoffmann Bernardes"
@@ -19,7 +19,6 @@
     "jquery": ">=1.7.0"
   },
   "ignore": [
-    "src/*.coffee",
     "node_modules",
     "bower_components",
     "test",
