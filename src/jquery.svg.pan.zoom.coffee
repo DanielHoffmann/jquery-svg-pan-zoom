@@ -240,8 +240,8 @@ do ($ = jQuery) ->
                 pos.x = event.touches[0].clientX
                 pos.y = event.touches[0].clientY
         else #mouse event
-            pos.x = event.clientX
-            pos.y = event.clientY
+            pos.x = parseInt(event.clientX or event.originalEvent.clientX)
+            pos.y = parseInt(event.clientY or event.originalEvent.clientY)
         ctm = svgRoot.getScreenCTM()
         ctm = ctm.inverse()
         pos = pos.matrixTransform(ctm);
@@ -428,8 +428,8 @@ do ($ = jQuery) ->
             #TODO detect presence of jquery-mousewheel plugin (soon it will merged to core jQuery)
             #use it instead of getting the delta from the original event
             #maybe use the mouse wheel delta as zoomFactor?
-            opts.$svg.on "mousewheel", ((ev) ->
-                delta = ev.originalEvent.wheelDeltaY
+            opts.$svg.on "mousewheel DOMMouseScroll MozMousePixelScroll", ((ev) ->
+                delta = parseInt(ev.originalEvent.wheelDelta or -ev.originalEvent.detail)
                 if delta == 0 or opts.events.mouseWheel != true
                     return
 
