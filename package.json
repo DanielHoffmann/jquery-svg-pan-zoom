@@ -1,0 +1,27 @@
+{
+  "name": "jquery-svg-pan-zoom",
+  "version": "1.0.1",
+  "homepage": "https://github.com/DanielHoffmann/jquery-svg-pan-zoom",
+  "contributors": [
+    "Daniel Hoffmann Bernardes"
+  ],
+  "description": "jQuery plugin to enable pan and zoom in SVG images either programatically or through mouse/touch events.",
+  "keywords": [
+    "jquery",
+    "svg",
+    "zoom",
+    "pan",
+    "touch"
+  ],
+  "main": "compiled/jquery.svg.pan.zoom.js",
+  "license": "MIT",
+  "dependencies": {
+    "jquery": ">=1.7.0"
+  },
+  "files": [
+    "/compiled/*",
+    "/src/*",
+    "/LICENSE",
+    "/README.md"
+  ]
+}
