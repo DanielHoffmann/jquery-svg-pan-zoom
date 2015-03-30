@@ -580,3 +580,5 @@ Copyright (C) 2014 Daniel Hoffmann Bernardes, Ícaro Technologies
   })(jQuery);
 
 }).call(this);
+
+//# sourceMappingURL=jquery.svg.pan.zoom.js.map
