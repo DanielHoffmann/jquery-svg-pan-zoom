@@ -6,6 +6,9 @@
     "Daniel Hoffmann Bernardes"
   ],
   "description": "jQuery plugin to enable pan and zoom in SVG images either programatically or through mouse/touch events.",
+  "scripts": {
+    "precommit": "gulp build && git add compiled"
+  },
   "keywords": [
     "jquery",
     "svg",
@@ -29,7 +32,8 @@
     "gulp": "3.8.11",
     "gulp-coffee": "2.3.1",
     "gulp-help": "1.3.4",
-    "gulp-sourcemaps": "1.5.1"
+    "gulp-sourcemaps": "1.5.1",
+    "husky": "0.7.0"
   },
   "repository": {
     "type": "git",
