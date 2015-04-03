@@ -246,39 +246,7 @@ do ($ = jQuery) ->
         ctm = ctm.inverse()
         pos = pos.matrixTransform(ctm);
         return pos
-        
-        
-    #performs a zoomIn or zoomOut on the opts referenced SVG using the event mouse position
-    mouseZoom = (event, zoomIn, opts) ->
-        oldViewBox = @getViewBox()
 
-        event.preventDefault()
-        event.stopPropagation()
-
-        oldMousePosition = getViewBoxCoordinatesFromEvent(@$svg[0], ev)
-        oldcenter =
-            x: viewBox.x + viewBox.width/2
-            y: viewBox.y + viewBox.height/2
-        oldDistanceFromCenter =
-            x: oldcenter.x - oldMousePosition.x
-            y: oldcenter.y - oldMousePosition.y
-
-        if delta > 0
-            @zoomIn(undefined, 0)
-        else
-            @zoomOut(undefined, 0)
-
-        newMousePosition = getViewBoxCoordinatesFromEvent(@$svg[0], ev)
-
-        newcenter =
-            x: oldcenter.x + (oldMousePosition.x - newMousePosition.x)
-            y: oldcenter.y + (oldMousePosition.y - newMousePosition.y)
-
-        @setCenter(newcenter.x, newcenter.y, 0)
-        newViewBox = @getViewBox()
-        @setViewBox(oldViewBox.x, oldViewBox.y, oldViewBox.width, oldViewBox.height, 0) #turns back the viewBox to the original position
-        @setViewBox(newViewBox.x, newViewBox.y, newViewBox.width, newViewBox.height) #sets the viewBox to the new calculated position but shows animation if enabled
-        return
 
     $.fn.svgPanZoom = (options) ->
         ret= []
