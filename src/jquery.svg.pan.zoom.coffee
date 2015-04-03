@@ -391,7 +391,7 @@ do ($ = jQuery) ->
                     opts.key= value.bind(opts)
 
             #binding events
-            
+
 
             #TODO detect presence of jquery-mousewheel plugin (soon it will merged to core jQuery)
             #use it instead of getting the delta from the original event
@@ -432,7 +432,7 @@ do ($ = jQuery) ->
                 return
             ).bind(opts)
 
-            
+
 
             opts.$svg.dblclick ((ev) ->
                 if opts.events.doubleClick != true
@@ -448,11 +448,11 @@ do ($ = jQuery) ->
                     ev.stopPropagation()
                     ev.preventDefault()
             , true)
-            
+
             dragStarted = false
-                        
+
             preventClick = false
-            
+
             opts.$svg.on "mousedown touchstart", ((ev) ->
                 if dragStarted #a drag operation is already happening
                     return
@@ -480,10 +480,10 @@ do ($ = jQuery) ->
                     initialMousePosition = getViewBoxCoordinatesFromEvent(@$svg[0], ev)
 
                     currentMousePosition = getViewBoxCoordinatesFromEvent(@$svg[0], ev2)
-                    
+
                     if Math.sqrt(Math.pow(ev.pageX + ev2.pageX, 2) + Math.pow(ev.pageY + ev2.pageY, 2)) > 3 #mouse moved at least 3 pixels
                         preventClick = true
-                        
+
                     @setViewBox(
                         initialViewBox.x + initialMousePosition.x - currentMousePosition.x,
                         initialViewBox.y + initialMousePosition.y - currentMousePosition.y,
@@ -497,7 +497,7 @@ do ($ = jQuery) ->
                 mouseUpCallback = ((ev2) ->
                     if ev2.type == "mouseout" and ev2.target != ev2.currentTarget #mouse out on an element that is not the body
                         return
-                    
+
                     ev2.preventDefault()
                     ev2.stopPropagation()
 
