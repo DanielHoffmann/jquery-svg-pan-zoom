@@ -171,11 +171,21 @@ do ($ = jQuery) ->
         width: 1000
         height: 1000
 
-    ###
-    checks the limits of the view box, returns a new viewBox that respects the limits
-    while keeping the original view box size if possible
-    If the view box needs to be reduced the returned view box will keep the aspect ratio of
-    the original view box
+    ###*
+    # Check the limits of the view box, return a new viewBox that respects the limits while keeping
+    # the original view box size if possible. If the view box needs to be reduced, the returned view
+    # box will keep the aspect ratio of the original view box.
+    #
+    # @param {Object} viewBox
+    #   The original view box. Takes numbers, in the format `{x, y, width, height}`.
+    #
+    # @param {Object} limits
+    #   Extents which can be shown, in the view box coordinate system. Takes numbers in the format
+    #   `{x, y, x2, y2}`.
+    #
+    # @return {Object} viewBox
+    #   A new view box object, squeezed into the limits. Contains numbers, in the format `{x, y,
+    #   width, height}`.
     ###
     checkLimits= (viewBox, limits) ->
         vb = $.extend({}, viewBox)
@@ -216,8 +226,15 @@ do ($ = jQuery) ->
 
         return vb
 
-    #parses the viewbox string as defined in the spec for the svg tag
-    #returns an object with x, y, width and height values
+    ###*
+    # Parse the viewbox string as defined in the spec for the svg tag.
+    #
+    # @param {String} viewBoxString
+    #   A valid value of the `viewBox` attribute.
+    #
+    # @return {Object} viewBox
+    #   A view box object. Contains numbers, in the format `{x, y, width, height}`.
+    ###
     parseViewBoxString = (string) ->
         vb = string.replace("\s+", " ").split(" ")
         vb =
@@ -227,9 +244,18 @@ do ($ = jQuery) ->
             height: parseFloat(vb[3])
 
 
-    #gets the mouse or first touch position from the event relative to the SVG viewBox
-    #svgRoot is the DOM object (not jQuery object)
-    #returns an object { x: , y: }
+    ###*
+    # Get the mouse or first touch position from the `event`, relative to the SVG viewBox.
+    #
+    # @param {SVGSVGElement} svgRoot
+    #   The `<svg>` DOM object
+    #
+    # @param {MouseEvent|TouchEvent} event
+    #   The DOM event.
+    #
+    # @return {Object}
+    #   Coordinates of the event. Contains numbers, in the format `{x, y}`.
+    ###
     getViewBoxCoordinatesFromEvent = (svgRoot, event) ->
         pos = svgRoot.createSVGPoint()
         if event.type == "touchstart" or event.type == "touchmove"
