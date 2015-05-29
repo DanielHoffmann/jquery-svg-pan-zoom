@@ -515,6 +515,7 @@ do ($ = jQuery) ->
                 initialViewBox = $.extend({}, viewBox)
 
                 $body = $(window.document.body)
+                domBody= $body[0]
                 oldCursor = $body.css("cursor")
                 if @events.dragCursor?
                     $body.css("cursor", @events.dragCursor)
@@ -549,12 +550,14 @@ do ($ = jQuery) ->
                     ev2.preventDefault()
                     ev2.stopPropagation()
 
-                    $body[0].removeEventListener("mousemove", mouseMoveCallback, true)
-                    $body[0].removeEventListener("touchmove", mouseMoveCallback, true)
-                    $body[0].removeEventListener("mouseup", mouseUpCallback, true)
-                    $body[0].removeEventListener("touchend", mouseUpCallback, true)
-                    $body[0].removeEventListener("touchcancel", mouseUpCallback, true)
-                    $body[0].removeEventListener("mouseout", mouseUpCallback, true)
+                    #we want to trigger the events in the capture phase as opposed to the bubble phase
+                    #so we can not use jQuery here
+                    domBody.removeEventListener("mousemove", mouseMoveCallback, true)
+                    domBody.removeEventListener("touchmove", mouseMoveCallback, true)
+                    domBody.removeEventListener("mouseup", mouseUpCallback, true)
+                    domBody.removeEventListener("touchend", mouseUpCallback, true)
+                    domBody.removeEventListener("touchcancel", mouseUpCallback, true)
+                    domBody.removeEventListener("mouseout", mouseUpCallback, true)
 
                     if @events.dragCursor?
                         $body.css("cursor", oldCursor)
@@ -563,12 +566,12 @@ do ($ = jQuery) ->
                     return
                 ).bind(opts)
 
-                $body[0].addEventListener("mousemove", mouseMoveCallback, true)
-                $body[0].addEventListener("touchmove", mouseMoveCallback, true)
-                $body[0].addEventListener("mouseup", mouseUpCallback, true)
-                $body[0].addEventListener("touchend", mouseUpCallback, true)
-                $body[0].addEventListener("touchcancel", mouseUpCallback, true)
-                $body[0].addEventListener("mouseout", mouseUpCallback, true)
+                domBody.addEventListener("mousemove", mouseMoveCallback, true)
+                domBody.addEventListener("touchmove", mouseMoveCallback, true)
+                domBody.addEventListener("mouseup", mouseUpCallback, true)
+                domBody.addEventListener("touchend", mouseUpCallback, true)
+                domBody.addEventListener("touchcancel", mouseUpCallback, true)
+                domBody.addEventListener("mouseout", mouseUpCallback, true)
                 return
             ).bind(opts)
 
