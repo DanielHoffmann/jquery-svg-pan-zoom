@@ -321,8 +321,8 @@ Copyright (C) 2014 Daniel Hoffmann Bernardes, Ícaro Technologies
         } else if (typeof opts.initialViewBox === "string") {
           vb = parseViewBoxString(opts.initialViewBox);
         } else if (typeof opts.initialViewBox === "object") {
-          vb === null;
-          if (opts.initialViewBox === null) {
+          vb = null;
+          if (opts.initialViewBox == null) {
             vb = opts.$svg[0].getAttribute("viewBox");
             if (vb != null) {
               vb = parseViewBoxString(vb);
@@ -330,7 +330,7 @@ Copyright (C) 2014 Daniel Hoffmann Bernardes, Ícaro Technologies
               vb = null;
             }
           }
-          if (vb === null) {
+          if (vb == null) {
             vb = $.extend({}, defaultViewBox, opts.initialViewBox);
           }
         } else {

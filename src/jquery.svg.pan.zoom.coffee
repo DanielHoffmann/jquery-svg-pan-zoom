@@ -306,7 +306,7 @@ do ($ = jQuery) ->
 
             opts.$svg[0].setAttribute("preserveAspectRatio", "xMidYMid meet");
 
-            vb= $.extend({}, @.viewBox.baseVal)
+            vb = $.extend({}, @.viewBox.baseVal)
             unless opts.initialViewBox?
                 if vb.x == 0 and vb.y == 0  and vb.width == 0 and vb.height == 0
                     vb = defaultViewBox
@@ -319,14 +319,14 @@ do ($ = jQuery) ->
             else if typeof opts.initialViewBox == "string"
                 vb = parseViewBoxString(opts.initialViewBox)
             else if typeof opts.initialViewBox == "object"
-                vb == null
-                if opts.initialViewBox == null
+                vb = null
+                unless opts.initialViewBox?
                     vb = opts.$svg[0].getAttribute("viewBox")
                     if vb?
                         vb = parseViewBoxString(vb)
                     else
                         vb = null
-                if vb == null
+                unless vb?
                     vb = $.extend({}, defaultViewBox, opts.initialViewBox)
             else
                 throw "initialViewBox is of invalid type"
