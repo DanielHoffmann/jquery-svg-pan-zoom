@@ -1,5 +1,5 @@
 ###
-jQuery SVG Pan Zoom v1.0.1, December 2014
+jQuery SVG Pan Zoom v1.0.2, June 2015
 
 Author: Daniel Hoffmann Bernardes (daniel.hoffmann.bernardes@gmail.com)
 
