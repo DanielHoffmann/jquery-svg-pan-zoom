@@ -171,11 +171,21 @@ do ($ = jQuery) ->
         width: 1000
         height: 1000
 
-    ###
-    checks the limits of the view box, returns a new viewBox that respects the limits
-    while keeping the original view box size if possible
-    If the view box needs to be reduced the returned view box will keep the aspect ratio of
-    the original view box
+    ###*
+    # Check the limits of the view box, return a new viewBox that respects the limits while keeping
+    # the original view box size if possible. If the view box needs to be reduced, the returned view
+    # box will keep the aspect ratio of the original view box.
+    #
+    # @param {Object} viewBox
+    #   The original view box. Takes numbers, in the format `{x, y, width, height}`.
+    #
+    # @param {Object} limits
+    #   Extents which can be shown, in the view box coordinate system. Takes numbers in the format
+    #   `{x, y, x2, y2}`.
+    #
+    # @return {Object} viewBox
+    #   A new view box object, squeezed into the limits. Contains numbers, in the format `{x, y,
+    #   width, height}`.
     ###
     checkLimits= (viewBox, limits) ->
         vb = $.extend({}, viewBox)
@@ -216,8 +226,15 @@ do ($ = jQuery) ->
 
         return vb
 
-    #parses the viewbox string as defined in the spec for the svg tag
-    #returns an object with x, y, width and height values
+    ###*
+    # Parse the viewbox string as defined in the spec for the svg tag.
+    #
+    # @param {String} viewBoxString
+    #   A valid value of the `viewBox` attribute.
+    #
+    # @return {Object} viewBox
+    #   A view box object. Contains numbers, in the format `{x, y, width, height}`.
+    ###
     parseViewBoxString = (string) ->
         vb = string.replace("\s+", " ").split(" ")
         vb =
@@ -227,58 +244,53 @@ do ($ = jQuery) ->
             height: parseFloat(vb[3])
 
 
-    #gets the mouse or first touch position from the event relative to the SVG viewBox
-    #svgRoot is the DOM object (not jQuery object)
-    #returns an object { x: , y: }
+    ###*
+    # Get the mouse or first touch position from the `event`, relative to the SVG viewBox.
+    #
+    # @param {SVGElement} svgRoot
+    #   The `<svg>` DOM object
+    #
+    # @param {MouseEvent|TouchEvent|jQueryEvent} event
+    #   The DOM or jQuery event.
+    #
+    # @return {Object}
+    #   Coordinates of the event. Contains numbers, in the format `{x, y}`.
+    ###
     getViewBoxCoordinatesFromEvent = (svgRoot, event) ->
-        pos = svgRoot.createSVGPoint()
+        foo=
+            x: null
+            y: null
         if event.type == "touchstart" or event.type == "touchmove"
-            if event.originalEvent?
-                pos.x = event.originalEvent.touches[0].clientX
-                pos.y = event.originalEvent.touches[0].clientY
+            #in this method event can be a DOM event or a jQuery normalized event
+            #jQueryEvents do not expose the touches value
+            #so we need to go in the original event
+            if event.originalEvent? and not event.touches?
+                foo.x = event.originalEvent.touches[0].clientX
+                foo.y = event.originalEvent.touches[0].clientY
             else
-                pos.x = event.touches[0].clientX
-                pos.y = event.touches[0].clientY
+                foo.x = event.touches[0].clientX
+                foo.y = event.touches[0].clientY
         else #mouse event
-            pos.x = parseInt(event.clientX or event.originalEvent.clientX)
-            pos.y = parseInt(event.clientY or event.originalEvent.clientY)
+            #for some reason mouse events binded using jQuery
+            #set clientX and clientY as undefined so we need to go
+            #into the original event
+            if event.clientX?
+                foo.x = event.clientX
+                foo.y = event.clientY
+            else
+                foo.x = event.originalEvent.clientX
+                foo.y = event.originalEvent.clientY
+
+        pos = svgRoot.createSVGPoint()
+
+        #we calling parseInt() because otherwise firefox SVGPoint implementation gives
+        #TypeError: Value being assigned to SVGPoint.x is not a finite floating-point value.
+        pos.x= parseInt(foo.x, 10)
+        pos.y= parseInt(foo.y, 10)
         ctm = svgRoot.getScreenCTM()
         ctm = ctm.inverse()
         pos = pos.matrixTransform(ctm);
         return pos
-        
-        
-    #performs a zoomIn or zoomOut on the opts referenced SVG using the event mouse position
-    mouseZoom = (event, zoomIn, opts) ->
-        oldViewBox = @getViewBox()
-
-        event.preventDefault()
-        event.stopPropagation()
-
-        oldMousePosition = getViewBoxCoordinatesFromEvent(@$svg[0], ev)
-        oldcenter =
-            x: viewBox.x + viewBox.width/2
-            y: viewBox.y + viewBox.height/2
-        oldDistanceFromCenter =
-            x: oldcenter.x - oldMousePosition.x
-            y: oldcenter.y - oldMousePosition.y
-
-        if delta > 0
-            @zoomIn(undefined, 0)
-        else
-            @zoomOut(undefined, 0)
-
-        newMousePosition = getViewBoxCoordinatesFromEvent(@$svg[0], ev)
-
-        newcenter =
-            x: oldcenter.x + (oldMousePosition.x - newMousePosition.x)
-            y: oldcenter.y + (oldMousePosition.y - newMousePosition.y)
-
-        @setCenter(newcenter.x, newcenter.y, 0)
-        newViewBox = @getViewBox()
-        @setViewBox(oldViewBox.x, oldViewBox.y, oldViewBox.width, oldViewBox.height, 0) #turns back the viewBox to the original position
-        @setViewBox(newViewBox.x, newViewBox.y, newViewBox.width, newViewBox.height) #sets the viewBox to the new calculated position but shows animation if enabled
-        return
 
     $.fn.svgPanZoom = (options) ->
         ret= []
@@ -351,6 +363,8 @@ do ($ = jQuery) ->
                         width: viewBox.width + "px"
                         height: viewBox.height + "px"
 
+                #the parameters in this method can be undefined/null
+                #in that case we keep the current values
                 viewBox =
                     x: if x? then x else viewBox.x
                     y: if y? then y else viewBox.y
@@ -358,11 +372,12 @@ do ($ = jQuery) ->
                     height: if height then height else viewBox.height
                 viewBox= checkLimits(viewBox, @limits)
 
-                #can't use $.attr because in SVG attributes are case-sensitive and jQuery lowercases the attribute names
+                #we can't use $.attr because in SVG attributes are case-sensitive and jQuery lowercases the attribute names
                 if animationTime > 0
                     #.animate() animates CSS rules, but we are changing the tag attributes
                     #so we instead animate this div that is not inside the DOM
                     #in the step callback of the animate function we set the viewBox on the svg
+                    #to be the same as the values set in this placeholder div
                     $animationDiv.stop().animate
                             left: viewBox.x
                             top: viewBox.y
@@ -422,8 +437,9 @@ do ($ = jQuery) ->
                 if typeof value == "function"
                     opts.key= value.bind(opts)
 
-            #binding events
-            
+            ###################################
+            # binding events
+            ###################################
 
             #TODO detect presence of jquery-mousewheel plugin (soon it will merged to core jQuery)
             #use it instead of getting the delta from the original event
@@ -464,7 +480,7 @@ do ($ = jQuery) ->
                 return
             ).bind(opts)
 
-            
+
 
             opts.$svg.dblclick ((ev) ->
                 if opts.events.doubleClick != true
@@ -480,11 +496,11 @@ do ($ = jQuery) ->
                     ev.stopPropagation()
                     ev.preventDefault()
             , true)
-            
+
             dragStarted = false
-                        
+
             preventClick = false
-            
+
             opts.$svg.on "mousedown touchstart", ((ev) ->
                 if dragStarted #a drag operation is already happening
                     return
@@ -512,10 +528,10 @@ do ($ = jQuery) ->
                     initialMousePosition = getViewBoxCoordinatesFromEvent(@$svg[0], ev)
 
                     currentMousePosition = getViewBoxCoordinatesFromEvent(@$svg[0], ev2)
-                    
+
                     if Math.sqrt(Math.pow(ev.pageX + ev2.pageX, 2) + Math.pow(ev.pageY + ev2.pageY, 2)) > 3 #mouse moved at least 3 pixels
                         preventClick = true
-                        
+
                     @setViewBox(
                         initialViewBox.x + initialMousePosition.x - currentMousePosition.x,
                         initialViewBox.y + initialMousePosition.y - currentMousePosition.y,
@@ -529,7 +545,7 @@ do ($ = jQuery) ->
                 mouseUpCallback = ((ev2) ->
                     if ev2.type == "mouseout" and ev2.target != ev2.currentTarget #mouse out on an element that is not the body
                         return
-                    
+
                     ev2.preventDefault()
                     ev2.stopPropagation()
 
