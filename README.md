@@ -22,7 +22,7 @@ jQuery
 SVG-enabled browser (does not work with SVG work-arounds that use Flash)
 
 # The viewBox
-The viewBox is an attribute of SVG images that define which parts of the image are visible, it is defined by 4 numbers: X, Y, Width, Height. These numbers together specify the visible area. This plugin works by manipulating these four numbers. For example, moving the image to the right alters the X value while zooming in reduces Width and Height.
+The viewBox is an attribute of SVG images that defines the area of the SVG that is visible, it is defined by 4 numbers: X, Y, Width, Height. These numbers together specify the visible area. This plugin works by manipulating these four numbers. For example, moving the image to the right alters the X value while zooming in reduces Width and Height.
 
 
 # Usage
@@ -142,4 +142,5 @@ Sets the center of the SVG. Parameters:
 
  - Only works in SVGs inlined in the HTML. You can use $.load() to load the SVG image in the page using AJAX and call $().svgPanZoom() in the callback
  - Touch pinch events to zoom not yet supported
- - This plugin does not create any controls (like arrows to move the image) on top of the SVG. These controls are simple to create manually and they can call the methods to move the image.
+ - This plugin does not create any controls (like arrows to move the image) on top of the SVG. These controls are simple to create manually and they can programmatically call the methods to move the image.
+ - Do not manipulate the SVG viewBox attribute manually, use SvgPanZoom.setViewBox() instead

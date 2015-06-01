@@ -24,7 +24,7 @@ jQuery
 SVG-enabled browser (does not work with SVG work-arounds that use Flash)
 
 # The viewBox
-The viewBox is an attribute of SVG images that define which parts of the image are visible, it is defined by 4 numbers: X, Y, Width, Height. These numbers together specify the visible area. This plugin works by manipulating these four numbers. For example, moving the image to the right alters the X value while zooming in reduces Width and Height.
+The viewBox is an attribute of SVG images that defines the area of the SVG that is visible, it is defined by 4 numbers: X, Y, Width, Height. These numbers together specify the visible area. This plugin works by manipulating these four numbers. For example, moving the image to the right alters the X value while zooming in reduces Width and Height.
 
 
 # Usage
@@ -145,6 +145,7 @@ Sets the center of the SVG. Parameters:
  - Only works in SVGs inlined in the HTML. You can use $.load() to load the SVG image in the page using AJAX and call $().svgPanZoom() in the callback
  - Touch pinch events to zoom not yet supported
  - This plugin does not create any controls (like arrows to move the image) on top of the SVG. These controls are simple to create manually and they can call the methods to move the image.
+ - Do not manipulate the SVG viewBox attribute manually, use SvgPanZoom.setViewBox() instead
 
 Copyright (C) 2014 Daniel Hoffmann Bernardes, Ícaro Technologies
  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -306,11 +307,11 @@ do ($ = jQuery) ->
 
             opts.$svg[0].setAttribute("preserveAspectRatio", "xMidYMid meet");
 
-            vb = $.extend({}, @.viewBox.baseVal)
+            vb = $.extend({}, opts.$svg[0].viewBox.baseVal)
             unless opts.initialViewBox?
-                if vb.x == 0 and vb.y == 0  and vb.width == 0 and vb.height == 0
+                if vb.x == 0 and vb.y == 0 and vb.width == 0 and vb.height == 0
                     vb = defaultViewBox
-                else
+                else #viewBox defined on HTML element
                     vb =
                         x: vb.x
                         y: vb.y
@@ -319,15 +320,7 @@ do ($ = jQuery) ->
             else if typeof opts.initialViewBox == "string"
                 vb = parseViewBoxString(opts.initialViewBox)
             else if typeof opts.initialViewBox == "object"
-                vb = null
-                unless opts.initialViewBox?
-                    vb = opts.$svg[0].getAttribute("viewBox")
-                    if vb?
-                        vb = parseViewBoxString(vb)
-                    else
-                        vb = null
-                unless vb?
-                    vb = $.extend({}, defaultViewBox, opts.initialViewBox)
+                vb = $.extend({}, defaultViewBox, opts.initialViewBox)
             else
                 throw "initialViewBox is of invalid type"
 
