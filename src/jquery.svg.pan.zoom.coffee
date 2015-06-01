@@ -191,9 +191,8 @@ do ($ = jQuery) ->
     checkLimits= (viewBox, limits) ->
         vb = $.extend({}, viewBox)
 
-        limitsWidth = limits.x2 - limits.x
-        limitsHeight = limits.y2 - limits.y
-
+        limitsWidth = Math.abs(limits.x2 - limits.x)
+        limitsHeight = Math.abs(limits.y2 - limits.y)
 
         #reducing the view box size if it no longer fits within the limits
         if vb.width > limitsWidth
@@ -206,10 +205,14 @@ do ($ = jQuery) ->
                     reductionFactor = limitsWidth / vb.width
                     vb.width = limitsWidth
                     vb.height = vb.height * reductionFactor
-            else
+            else #reduce to fit width
+                reductionFactor = limitsWidth / vb.width
                 vb.width = limitsWidth
-        else if vb.height > limitsHeight
+                vb.height = vb.height * reductionFactor
+        else if vb.height > limitsHeight #reduce to fit height
+            reductionFactor = limitsHeight / vb.height
             vb.height = limitsHeight
+            vb.width = vb.width * reductionFactor
 
 
         #moving the view box if its bounds are outside the specified limits
@@ -307,7 +310,7 @@ do ($ = jQuery) ->
 
             opts.$svg[0].setAttribute("preserveAspectRatio", "xMidYMid meet");
 
-            vb = $.extend({}, opts.$svg[0].viewBox.baseVal)
+            vb = $.extend({}, @.viewBox.baseVal)
             unless opts.initialViewBox?
                 if vb.x == 0 and vb.y == 0 and vb.width == 0 and vb.height == 0
                     vb = defaultViewBox
@@ -320,7 +323,7 @@ do ($ = jQuery) ->
             else if typeof opts.initialViewBox == "string"
                 vb = parseViewBoxString(opts.initialViewBox)
             else if typeof opts.initialViewBox == "object"
-                vb = $.extend({}, defaultViewBox, opts.initialViewBox)
+                    vb = $.extend({}, defaultViewBox, opts.initialViewBox)
             else
                 throw "initialViewBox is of invalid type"
 

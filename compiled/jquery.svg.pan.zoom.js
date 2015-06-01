@@ -199,8 +199,8 @@ Copyright (C) 2014 Daniel Hoffmann Bernardes, Ícaro Technologies
     checkLimits = function(viewBox, limits) {
       var limitsHeight, limitsWidth, reductionFactor, vb;
       vb = $.extend({}, viewBox);
-      limitsWidth = limits.x2 - limits.x;
-      limitsHeight = limits.y2 - limits.y;
+      limitsWidth = Math.abs(limits.x2 - limits.x);
+      limitsHeight = Math.abs(limits.y2 - limits.y);
       if (vb.width > limitsWidth) {
         if (vb.height > limitsHeight) {
           if (limitsWidth > limitsHeight) {
@@ -213,10 +213,14 @@ Copyright (C) 2014 Daniel Hoffmann Bernardes, Ícaro Technologies
             vb.height = vb.height * reductionFactor;
           }
         } else {
+          reductionFactor = limitsWidth / vb.width;
           vb.width = limitsWidth;
+          vb.height = vb.height * reductionFactor;
         }
       } else if (vb.height > limitsHeight) {
+        reductionFactor = limitsHeight / vb.height;
         vb.height = limitsHeight;
+        vb.width = vb.width * reductionFactor;
       }
       if (vb.x < limits.x) {
         vb.x = limits.x;
@@ -307,7 +311,7 @@ Copyright (C) 2014 Daniel Hoffmann Bernardes, Ícaro Technologies
           opts.animationTime = 0;
         }
         opts.$svg[0].setAttribute("preserveAspectRatio", "xMidYMid meet");
-        vb = $.extend({}, opts.$svg[0].viewBox.baseVal);
+        vb = $.extend({}, this.viewBox.baseVal);
         if (opts.initialViewBox == null) {
           if (vb.x === 0 && vb.y === 0 && vb.width === 0 && vb.height === 0) {
             vb = defaultViewBox;
