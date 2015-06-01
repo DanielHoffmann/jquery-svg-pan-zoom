@@ -60,6 +60,7 @@ Options:
     },
     animationTime: number (300) // time in milliseconds to use as default for animations. Set 0 to remove the animation
     zoomFactor: 0.25 // how much to zoom-in or zoom-out
+    maxZoom: 3 //maximum zoom in, must be a number bigger than 1
     panFactor: 100 // how much to move the viewBox when calling .panDirection() methods
     initialViewBox: { // the initial viewBox, if null or undefined will try to use the viewBox set in the svg tag. Also accepts string in the format "X Y Width Height"
         x: number (0) // the top-left corner X coordinate
@@ -169,6 +170,7 @@ Copyright (C) 2014 Daniel Hoffmann Bernardes, Ícaro Technologies
       },
       animationTime: 300,
       zoomFactor: 0.25,
+      maxZoom: 3,
       panFactor: 100,
       initialViewBox: null,
       limits: null
@@ -338,8 +340,8 @@ Copyright (C) 2014 Daniel Hoffmann Bernardes, Ícaro Technologies
           opts.limits = {
             x: viewBox.x - horizontalSizeIncrement,
             y: viewBox.y - verticalSizeIncrement,
-            x2: viewBox.width + horizontalSizeIncrement,
-            y2: viewBox.height + verticalSizeIncrement
+            x2: viewBox.x + viewBox.width + horizontalSizeIncrement,
+            y2: viewBox.y + viewBox.height + verticalSizeIncrement
           };
         }
         opts.reset = function() {
@@ -472,7 +474,7 @@ Copyright (C) 2014 Daniel Hoffmann Bernardes, Ícaro Technologies
           }
         }
         opts.$svg.on("mousewheel DOMMouseScroll MozMousePixelScroll", (function(ev) {
-          var delta, newMousePosition, newViewBox, newcenter, oldDistanceFromCenter, oldMousePosition, oldViewBox, oldcenter;
+          var delta, minHeight, minWidth, newMousePosition, newViewBox, newcenter, oldDistanceFromCenter, oldMousePosition, oldViewBox, oldcenter, reductionFactor;
           delta = parseInt(ev.originalEvent.wheelDelta || -ev.originalEvent.detail);
           if (delta === 0 || opts.events.mouseWheel !== true) {
             return;
@@ -491,6 +493,18 @@ Copyright (C) 2014 Daniel Hoffmann Bernardes, Ícaro Technologies
           };
           if (delta > 0) {
             this.zoomIn(void 0, 0);
+            minWidth = this.initialViewBox.width / this.maxZoom;
+            minHeight = this.initialViewBox.height / this.maxZoom;
+            if (viewBox.width < minWidth) {
+              reductionFactor = minWidth / viewBox.width;
+              viewBox.width = minWidth;
+              viewBox.height = viewBox.height * reductionFactor;
+            }
+            if (viewBox.height < minHeight) {
+              reductionFactor = minHeight / viewBox.height;
+              viewBox.height = minHeight;
+              viewBox.width = viewBox.width * reductionFactor;
+            }
           } else {
             this.zoomOut(void 0, 0);
           }

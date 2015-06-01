@@ -56,6 +56,7 @@ Options:
     },
     animationTime: number (300) // time in milliseconds to use as default for animations. Set 0 to remove the animation
     zoomFactor: 0.25 // how much to zoom-in or zoom-out
+    maxZoom: 3 //maximum zoom in, must be a number bigger than 1
     panFactor: 100 // how much to move the viewBox when calling .panDirection() methods
     initialViewBox: { // the initial viewBox, if null or undefined will try to use the viewBox set in the svg tag. Also accepts string in the format "X Y Width Height"
         x: number (0) // the top-left corner X coordinate
