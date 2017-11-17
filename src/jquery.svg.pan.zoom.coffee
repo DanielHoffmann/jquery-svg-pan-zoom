@@ -455,7 +455,7 @@ do ($ = jQuery) ->
                 center=
                     x: viewBox.x + viewBox.width/2
                     y: viewBox.y + viewBox.height/2
-                @setViewBox(center.x - newWidth/2, center.y - newWidth/2, newWidth, newHeight, animationTime)
+                @setViewBox(center.x - newWidth/2, center.y - newHeight/2, newWidth, newHeight, animationTime)
                 return
 
             opts.setCenter = (x, y, animationTime= @animationTime) ->
